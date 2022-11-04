@@ -1,0 +1,70 @@
+---
+title: "Section 3 Clusters"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r data}
+library(tidyverse)
+library(matrixStats)
+
+results <- data.frame(location = c("Negative Control", "Off-Campus Fountain", "On-Campus Fountain", "Off-Campus Sink", "On-Campus Sink", "Off-Campus Restaurant", "On-Campus Restaurant", "Positive Control"), total_cfu_count_rep1 = c(0.37, 30, 0.35, 3.5, 0.39, 0.30, 16.8, 30), total_cfu_count_rep2 = c(0.50, 30, 0.37, 3.2, 0.43, 0.33, 18.9, 30), total_cfu_count_rep3 = c(0.70, 30, 0.30, 6.2, 0.67, 0.31, 15.1, 30))
+
+results$total_cfu_mean <- rowMeans(results[,2:4], na.rm = TRUE)
+results <- results %>%
+  mutate(total_cfu_sd = rowSds(as.matrix(.[c("total_cfu_count_rep1", "total_cfu_count_rep2", "total_cfu_count_rep3")]))) %>%
+  mutate(total_cfu_se = total_cfu_sd/sqrt(3))
+
+results <- results %>%
+  mutate(campus = case_when(
+    str_detect(location, "^On-Campus") ~ "On-Campus",
+    str_detect(location, "^Off-Campus") ~ "Off-Campus",
+    str_detect(location, "Control$") ~ "Control")) %>% mutate(source = case_when(
+    str_detect(location, "Fountain") ~ "Fountain",
+    str_detect(location, "Sink") ~ "Sink",
+    str_detect(location, "Restaurant") ~ "Restaurant",
+    str_detect(location, "Control$") ~ "Control"
+  ))
+
+```
+
+```{r plots}
+t.score <- qt(0.025, df = 2, lower.tail = F)
+
+results %>%
+  ggplot() +
+  geom_bar(aes(x = location, y = total_cfu_mean), stat = "identity", fill = "blue") +
+  geom_point(aes(x = location, y = total_cfu_count_rep1)) +
+  geom_point(aes(x = location, y = total_cfu_count_rep2)) +
+  geom_point(aes(x = location, y = total_cfu_count_rep3)) +
+  geom_errorbar(aes(x= location, ymin = total_cfu_mean - (t.score * total_cfu_se), ymax = total_cfu_mean + (t.score * total_cfu_se)), width = 0.25) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1)) +
+  labs(title = "Total Colony Forming Units Across Water Sources", x = "Location", y = "Total CFU Count/ (Dilution Factor x 100 mL)")
+```
+
+```{r group_averages}
+results %>%
+  filter(campus != "Control") %>%
+  group_by(campus) %>%
+  summarise(campus_mean_cfu = mean(total_cfu_mean)) %>%
+  ggplot(aes(x = campus, y = campus_mean_cfu, fill = source)) +
+  geom_bar(position = "stack", stat="identity", fill = "blue") +
+  theme(axis.title.x = element_blank()) +
+  labs(title = "Off-Campus vs On-Campus Mean Total Colony Forming Units", y = "Total CFU Count/ (Dilution Factor x 100 mL)")
+
+results %>%
+  ungroup()
+```
+
+```{r source}
+results %>%
+  filter(campus != "Control") %>%
+  ggplot(aes(x= source, y=total_cfu_mean, fill = campus)) +
+  geom_bar(position = "stack", stat = "identity") +
+  labs(title = "Source Types and Campus Colony Forming Units", x = "Source Type", y = "Total CFU Count/ (Dilution Factor x 100 mL)", fill = "Campus")
+```
+
+```{r statistical_analysis}
+
+```
+
