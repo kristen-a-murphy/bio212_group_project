@@ -63,10 +63,12 @@ results %>%
 ```
 
 ```{r group_averages}
-results %>%
+campus_averages <- results %>%
   filter(campus != "Control") %>%
   group_by(campus) %>%
-  summarise(campus_mean_cfu = mean(total_cfu_mean)) %>%
+  summarise(campus_mean_cfu = mean(total_cfu_mean))
+
+campus_averages %>%
   ggplot(aes(x = campus, y = campus_mean_cfu, fill = source)) +
   geom_bar(position = "stack", stat="identity", fill = "blue") +
   theme(axis.title.x = element_blank()) +
@@ -133,5 +135,11 @@ summary(aov(total_cfu_count~location, data = analysis_df))
 pairs <- pairwise.t.test(analysis_df$total_cfu_count, analysis_df$location, p.adj = "bonferroni")
 broom::tidy(pairs) %>%
   arrange(p.value)
+```
+
+```{r campus_t_test}
+campus <- c(0.35, 0.37, 0.30, 0.39, 0.43, 0.67, 16.80, 18.90, 15.10)
+off_campus <- c(29.8, 29.2, 27.8, 3.50, 3.20, 6.20, 0.30, 0.33, 0.31)
+t.test(campus, off_campus, conf.level = 0.95)
 ```
 
