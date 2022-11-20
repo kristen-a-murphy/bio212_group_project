@@ -143,13 +143,13 @@ t_test_df <- data.frame(campus <- c("Campus","Campus","Campus","Campus","Campus"
 fligner.test(cfus~campus, t_test_df)
 
 ggdensity(t_test_df$cfus[t_test_df$campus == "Campus"]) +
-  labs(title = "On-Campus Data Density Plot")
+  labs(title = "On-Campus Data Density Plot", x = "CFUs", y = "Density")
 ggqqplot(t_test_df$cfus[t_test_df$campus == "Campus"]) +
   labs(title = "On-Campus Data Q-Q Plot")
 shapiro.test(t_test_df$cfus[t_test_df$campus == "Campus"])
 
 ggdensity(t_test_df$cfus[t_test_df$campus == "Off-Campus"]) +
-  labs(title = "Off-Campus Data Density Plot")
+  labs(title = "Off-Campus Data Density Plot", x = "CFUs", y = "Density")
 ggqqplot(t_test_df$cfus[t_test_df$campus == "Off-Campus"]) +
   labs(title = "Off-Campus Data Q-Q Plot")
 shapiro.test(t_test_df$cfus[t_test_df$campus == "Off-Campus"])
